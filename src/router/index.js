@@ -67,32 +67,6 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: '首页',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
-    ]
-  },
-  {
-    path: '/system/user',
-    component: Layout,
-    redirect: '/system/user',
-    children: [
-      {
-        path: '/system/user',
-        component: () => import('@/views/system/user/list'),
-        name: '用户管理',
-        meta: { title: '用户管理', icon: 'user' }
-      }
-    ]
-  },
 //  {
 //	path: '/documentation',
 //	component: Layout,
@@ -138,6 +112,32 @@ export const constantRoutes = [
  * asyncRoutes the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index'),
+        name: '首页',
+        meta: { title: '首页', icon: 'dashboard', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/system/user',
+    component: Layout,
+    redirect: '/system/user',
+    children: [
+      {
+        path: '/system/user',
+        component: () => import('@/views/system/user/list'),
+        name: '用户管理',
+        meta: { title: '用户管理', icon: 'user', perms: ['sys:user:list'] }
+      }
+    ]
+  },
 //  {
 //    path: '/permission',
 //    component: Layout,
