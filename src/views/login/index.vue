@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+<!--         <h3 class="title">登 录</h3> -->
       </div>
 
       <el-form-item prop="username">
@@ -18,6 +18,7 @@
           type="text"
           tabindex="1"
           autocomplete="on"
+          clearable
         />
       </el-form-item>
 
@@ -38,6 +39,7 @@
             @keyup.native="checkCapslock"
             @blur="capsTooltip = false"
             @keyup.enter.native="handleLogin"
+            clearable
           />
           <span class="show-pwd" @click="showPwd">
             <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
@@ -45,7 +47,7 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
 <!--       <div style="position:relative"> -->
 <!--         <div class="tips"> -->
@@ -74,7 +76,6 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
 
 export default {
@@ -82,15 +83,19 @@ export default {
   components: { SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('Please enter the correct user name'))
+      if (!value) {
+    	  callback(new Error('请输入用户名'))
+      } else if (value.length > 20) {
+        callback(new Error('用户名不能超过20位字符'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (!value) {
+      	callback(new Error('请输入密码'))
+      } else if (value.length < 6 || value.length > 20) {
+        callback(new Error('密码为6-20位字符'))
       } else {
         callback()
       }

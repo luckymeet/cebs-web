@@ -126,12 +126,12 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/system/user',
+    path: '/system',
     component: Layout,
     redirect: '/system/user',
     children: [
       {
-        path: '/system/user',
+        path: 'user',
         component: () => import('@/views/system/user/list'),
         name: '用户管理',
         meta: { title: '用户管理', icon: 'user', perms: ['sys:user:list'] }

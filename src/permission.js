@@ -29,7 +29,11 @@ router.beforeEach(async(to, from, next) => {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoutes = store.getters.permission_routes && store.getters.permission_routes.length > 0
       if (hasRoutes) {
-        next()
+    	  if (to.matched.length === 0) {  //如果未匹配到路由
+    		  next({ path: '/401' })
+    	  } else {
+    		  next()
+    	  }
       } else {
         try {
           // get user info
@@ -49,10 +53,9 @@ router.beforeEach(async(to, from, next) => {
           next({ ...to, replace: true })
         } catch (error) {
           // remove token and go to login page to re-login
-    	  debugger
           await store.dispatch('user/resetUser')
           Message.error(error || 'Has Error')
-          next(`/login?redirect=${to.path}`)
+          next(`/login`)
           NProgress.done()
         }
       }

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
+import router from '@/router/index.js'
 
 // create an axios instance
 const service = axios.create({
@@ -44,33 +45,22 @@ service.interceptors.response.use(
   response => {
     const res = response.data
 
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 200) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
-      // 504: Illegal token; 505: Token expired; 506: Other clients logged in;
-      if (res.code === 504 || res.code === 505 || res.code === 506) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: '重新登录',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          store.dispatch('user/resetUser').then(() => {
-            location.reload()
-          })
-        })
-      }
-      if (res.code === 401) {
-    	  this.$router.push("/401")
-      }
+    if (res.code === 200) {
+    	// 成功
+    	return res
+    } else if (res.code == 401) {
+    	// 未授权
+    	router.replace({path: '/401'})
+    	return Promise.reject()
     } else {
-      return res
+    	Message({
+    		message: res.message || 'Error',
+    		type: 'error',
+    		duration: 5 * 1000
+    	})
+    	return Promise.reject()
     }
+
   },
   error => {
     console.log('err' + error) // for debug

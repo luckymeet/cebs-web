@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 
-export function login(data) {
+export function login(params) {
   return request({
     url: '/sys/login',
     method: 'post',
-    params: data
+    params: params
   })
 }
 
@@ -15,19 +15,42 @@ export function logout() {
 	})
 }
 
-export function getInfo(token) {
+export function fetchUserList(params) {
+	return request({
+		url: '/sys/user/list',
+		method: 'get',
+		params: params
+	})
+}
+
+export function getUser(id) {
   return request({
-    url: '/sys/user/info',
+    url: '/sys/user',
     method: 'get',
-    params: { token }
+    params: { id }
   })
 }
 
-
-export function fetchList(query) {
+export function addUser(params) {
   return request({
-    url: '/sys/user/list',
-    method: 'get',
-    params: query
+    url: '/sys/user',
+    method: 'post',
+    params: params
   })
 }
+
+export function editUser(params) {
+  return request({
+    url: '/sys/user',
+    method: 'put',
+    params: params
+  })
+}
+
+export function deleteUser(id) {
+  return request({
+    url: '/sys/user/' + {id},
+    method: 'delete',
+  })
+}
+
