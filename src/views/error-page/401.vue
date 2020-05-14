@@ -12,7 +12,7 @@
         <h6>如有不满请联系你领导</h6>
         <ul class="list-unstyled">
           <li>或者你可以去:</li>
-          <li class="link-type" @click.native="logout">
+          <li class="link-type" @click="logout">
               重新登录
           </li>
           <li class="link-type">
@@ -58,7 +58,7 @@ export default {
     },
     async logout() {
         await this.$store.dispatch('user/logout')
-        this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+        this.$router.push(`/login`)
     }
   }
 }

@@ -15,3 +15,11 @@ export function queryLowerLevelPermList(parentId) {
     params: { parentId }
   })
 }
+
+export function queryCurUserPermTree() {
+  return request({
+    url: '/sys/perm/tree',
+    method: 'get',
+    params: {}
+  })
+}

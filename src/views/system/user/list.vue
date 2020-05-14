@@ -138,11 +138,10 @@
         </el-form-item>
         <el-form-item label="权限">
           <el-tree
-		    :props="user.perms"
-		    :load="loadNode"
+			:data="permTree"
 		    node-key="id"
-		    :default-checked-keys="user.permArray"
-		    lazy
+		    ref="permTree"
+		    :default-checked-keys="permArray"
 		    show-checkbox
 		    @check-change="handleCheckChange">
 		  </el-tree>
@@ -162,7 +161,7 @@
 
 <script>
 import { fetchUserList, getUser, addUser, editUser, deleteUser } from '@/api/user'
-import { queryCurUserOneLevelPermList, queryLowerLevelPermList } from '@/api/perm'
+import { queryCurUserOneLevelPermList, queryCurUserPermTree } from '@/api/perm'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -192,13 +191,10 @@ export default {
     	pageSize: 10
       },
       user: {
-        status: '1',
-        permArray:[],
-        perms: {
-          label: 'permName',
-	      children: 'zones'
-        }
+        status: '1'
       },
+      permTree:[],
+      permArray:[],
       dialogFormVisible: false,
       dialogStatus: '',
       sexTypeOptions,
@@ -242,12 +238,13 @@ export default {
       }
     },
     handleCreate() {
-        this.resetUser()
-        this.dialogStatus = 'create'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
-        })
+      this.resetUser()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+      this.loadPermTree()
     },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -263,82 +260,91 @@ export default {
       })
     },
     handleUpdate(row) {
-        this.dialogStatus = 'update'
-        this.dialogFormVisible = true
-        getUser(row.id).then(response => {
-          this.user = response.data
-          user.permArray = this.user.perms.split('');
-        })
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      getUser(row.id).then(response => {
+        this.user = response.data
+        this.loadPermTree()
+        this.permArray = this.user.permIds.split(',')
+      })
     },
     updateData() {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            editUser(this.user).then(response => {
-			    this.$message({
-			      type: 'success',
-			      message: '修改成功!'
-			    });
-            })
-          }
-        })
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          var keys = this.$refs.permTree.getCheckedKeys()
+          this.user.permIds = keys.join()
+          editUser(this.user).then(response => {
+		    this.$message({
+		      type: 'success',
+			  message: '修改成功!'
+	        });
+          })
+        }
+      })
     },
     handleDelete(row, index) {
-		this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-		    confirmButtonText: '确定',
-		    cancelButtonText: '取消',
-		    type: 'warning'
-		}).then(() => {
-	        deleteUser(this.user).then(response => {
-			    this.$message({
-			      type: 'success',
-			      message: '删除成功!'
-			    });
-	    	})
-		}).catch(() => {
-		    this.$message({
-		      type: 'info',
-		      message: '已取消删除'
-		    });
-		});
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+		  confirmButtonText: '确定',
+		  cancelButtonText: '取消',
+		  type: 'warning'
+      }).then(() => {
+	      deleteUser(this.user).then(response => {
+			  this.$message({
+			    type: 'success',
+			    message: '删除成功!'
+			  });
+	      })
+	  }).catch(() => {
+		  this.$message({
+		    type: 'info',
+		    message: '已取消删除'
+		  });
+	  });
     },
     handleCheckChange(data, checked, indeterminate) {
-        console.log(data, checked, indeterminate);
+      console.log(data, checked, indeterminate);
     },
-    handleNodeClick(data) {
-      console.log(data);
-    },
-    loadNode(node, resolve) {
-      if (node.level === 0) {
-    	queryCurUserOneLevelPermList().then(response => {
-        	return resolve(response.data);
-      	})
-      }
-      if (node.level > 1) return resolve([]);
-
-      var hasChild;
-      if (node.data.name === 'region1') {
-        hasChild = true;
-      } else if (node.data.name === 'region2') {
-        hasChild = false;
-      } else {
-        hasChild = Math.random() > 0.5;
-      }
-
-      setTimeout(() => {
-        var data;
-        if (hasChild) {
-          data = [{
-            name: 'zone' + this.count++
-          }, {
-            name: 'zone' + this.count++
-          }];
-        } else {
-          data = [];
-        }
-
-        resolve(data);
-      }, 500)
+//     handleNodeClick(data) {
+//       console.log(data);
+//     },
+ 	loadPermTree() {
+      queryCurUserPermTree().then(response => {
+    	this.permTree = response.data;
+	  })
     }
+
+//     loadNode(node, resolve) {
+//       if (node.level === 0) {
+//     	queryCurUserOneLevelPermList().then(response => {
+//         	return resolve(response.data);
+//       	})
+//       }
+//       if (node.level > 1) return resolve([]);
+
+//       var hasChild;
+//       if (node.data.name === 'region1') {
+//         hasChild = true;
+//       } else if (node.data.name === 'region2') {
+//         hasChild = false;
+//       } else {
+//         hasChild = Math.random() > 0.5;
+//       }
+
+//       setTimeout(() => {
+//         var data;
+//         if (hasChild) {
+//           data = [{
+//             name: 'zone' + this.count++
+//           }, {
+//             name: 'zone' + this.count++
+//           }];
+//         } else {
+//           data = [];
+//         }
+
+//         resolve(data);
+//       }, 500)
+//     }
   }
 }
 </script>
