@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
-import store from '@/store'
+import { Message } from 'element-ui'
+// import store from '@/store'
 import router from '@/router/index.js'
 
 // create an axios instance
@@ -14,13 +14,6 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
-//    if (store.getters.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-//      config.headers['X-Token'] = getToken()
-//    }
     return config
   },
   error => {
@@ -44,23 +37,21 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-
     if (res.code === 200) {
-    	// 成功
-    	return res
-    } else if (res.code == 401) {
-    	// 未授权
-    	router.replace({path: '/401'})
-    	return Promise.reject()
+      // 成功
+      return res
+    } else if (res.code === 401) {
+      // 未授权
+      router.replace({ path: '/401' })
+      return Promise.reject()
     } else {
-    	Message({
-    		message: res.message || 'Error',
-    		type: 'error',
-    		duration: 5 * 1000
-    	})
-    	return Promise.reject()
+      Message({
+        message: res.message || '抱歉！服务异常，请联系管理员',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      return Promise.reject()
     }
-
   },
   error => {
     console.log('err' + error) // for debug
