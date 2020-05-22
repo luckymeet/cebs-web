@@ -11,15 +11,15 @@
       </el-button>
     </div>
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
+      <el-button v-permission="['sys:user:add']" class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
         新增
       </el-button>
-      <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">
-        修改
+      <el-button v-permission="['sys:user:password:reset']" class="filter-item" type="primary" icon="el-icon-refresh-left" @click="handleCreate">
+        密码重置
       </el-button>
     </div>
     <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
-      <!--       <el-table-column type="selection" align="center" width="50"></el-table-column> -->
+      <el-table-column type="selection" align="center" width="50" />
       <!--       <el-table-column label="用户编号" align="center" width="150px">
         <template slot-scope="{row}">
           <span>{{ row.userNum }}</span>
@@ -42,7 +42,7 @@
       </el-table-column>
       <el-table-column label="生效状态" class-name="status-col" width="100px">
         <template slot-scope="{row}">
-          <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @click="changeStatus(row.id)" />
+          <el-switch v-model="row.status" :disabled="!checkPermission(['sys:user:status:change'])" :active-value="1" :inactive-value="0" @click="changeStatus(row.id)" />
         </template>
       </el-table-column>
       <el-table-column label="最后登录时间" width="200px" align="center">
@@ -62,13 +62,13 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button v-permission="['sys:user:edit']" type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button size="mini" type="success" @click="handleView(row)">
+          <el-button v-permission="['sys:user:view']" size="mini" type="success" @click="handleView(row)">
             查看
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
+          <el-button v-permission="['sys:user:delete']" size="mini" type="danger" @click="handleDelete(row,$index)">
             删除
           </el-button>
         </template>
@@ -76,7 +76,7 @@
     </el-table>
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :close-on-click-modal="false">
-      <el-form ref="dataForm" :rules="rules" :model="user" label-position="right" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="user" label-position="right" :disabled="disabled" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="真实姓名" prop="realName">
           <el-input v-model="user.realName" clearable />
         </el-form-item>
@@ -150,11 +150,13 @@ export default {
       permTree: [],
       permArray: [],
       dialogFormVisible: false,
+      disabled: false,
       dialogStatus: '',
       sexTypeOptions,
       textMap: {
         update: '编辑',
-        create: '新增'
+        create: '新增',
+        view: '查看'
       },
       rules: {
         nickName: [{ required: true, message: '请输入昵称', trigger: 'change' }],
@@ -195,6 +197,7 @@ export default {
       this.resetUser()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
+      this.disabled = false
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -217,6 +220,7 @@ export default {
     handleUpdate(row) {
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.disabled = false
       getUser(row.id).then(response => {
         this.user = response.data
         this.loadPermTree()
@@ -226,7 +230,7 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          var keys = this.$refs.permTree.getCheckedKeys()
+          var keys = this.$refs['permTree'].getCheckedKeys()
           this.user.permIds = keys.join()
           editUser(this.user).then(response => {
             this.dialogFormVisible = false
@@ -236,6 +240,16 @@ export default {
             })
           })
         }
+      })
+    },
+    handleView(row) {
+      this.dialogStatus = 'view'
+      this.dialogFormVisible = true
+      this.disabled = true
+      getUser(row.id).then(response => {
+        this.user = response.data
+        this.loadPermTree()
+        this.permArray = this.user.permIds.split(',')
       })
     },
     handleDelete(row, index) {

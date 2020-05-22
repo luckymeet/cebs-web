@@ -8,9 +8,9 @@ import { getMenuPerms, getButtonPerms } from '@/api/home'
  */
 function hasPermission(menuPerms, route) {
   if (route.meta && route.meta.perms) {
-	if (!menuPerms || menuPerms.length <= 0) {
-		return false
-	}
+    if (!menuPerms || menuPerms.length <= 0) {
+      return false
+    }
     return menuPerms.some(perm => route.meta.perms.includes(perm))
   } else {
     return true
@@ -41,8 +41,8 @@ export function filterAsyncRoutes(routes, menuPerms) {
 const state = {
   routes: [],
   addRoutes: [],
-  menuPerm:[],
-  buttonPerm:[]
+  menuPerm: [],
+  buttonPerm: []
 }
 
 const mutations = {
@@ -64,8 +64,8 @@ const mutations = {
 const actions = {
   getMenuPerms({ commit }) {
     return new Promise((resolve, reject) => {
-	  getMenuPerms().then(response => {
-    	const { data } = response
+      getMenuPerms().then(response => {
+        const { data } = response
         commit('SET_MENU_PERM', data)
         resolve(data)
       }).catch(error => {
@@ -75,9 +75,9 @@ const actions = {
   },
   getButtonPerms({ commit }) {
     return new Promise((resolve, reject) => {
-	  getButtonPerms().then(response => {
-    	const { data } = response
-        commit('SET_MENU_PERM', data)
+      getButtonPerms().then(response => {
+        const { data } = response
+        commit('SET_BUTTON_PERM', data)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -86,7 +86,7 @@ const actions = {
   },
   generateRoutes({ commit }, menuPerms) {
     return new Promise(resolve => {
-      let accessedRoutes = filterAsyncRoutes(asyncRoutes || [], menuPerms)
+      const accessedRoutes = filterAsyncRoutes(asyncRoutes || [], menuPerms)
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

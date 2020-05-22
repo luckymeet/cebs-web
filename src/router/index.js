@@ -126,19 +126,33 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/system',
+    path: '/sys',
     component: Layout,
-    redirect: '/system/user',
+    redirect: '/sys/user',
     children: [
       {
         path: 'user',
-        component: () => import('@/views/system/user/list'),
+        component: () => import('@/views/sys/user/list'),
         name: '用户管理',
         meta: { title: '用户管理', icon: 'user', perms: ['sys:user:list'] }
       }
     ]
   },
   {
+    path: '/info',
+    component: Layout,
+    redirect: '/info/article',
+    children: [
+      {
+        path: 'article',
+        component: () => import('@/views/info/article/list'),
+        name: '文章管理',
+        meta: { title: '文章管理', icon: 'user', perms: ['info:article:list'] }
+      }
+    ]
+  },
+
+  /*  {
     path: '/error',
     component: Layout,
     redirect: 'noRedirect',
@@ -173,7 +187,7 @@ export const asyncRoutes = [
         meta: { title: 'Error Log', icon: 'bug' }
       }
     ]
-  },
+  },*/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

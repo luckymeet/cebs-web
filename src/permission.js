@@ -29,18 +29,19 @@ router.beforeEach(async(to, from, next) => {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoutes = store.getters.permission_routes && store.getters.permission_routes.length > 0
       if (hasRoutes) {
-    	  if (to.matched.length === 0) {  //如果未匹配到路由
-    		  next({ path: '/401' })
-    	  } else {
-    		  next()
-    	  }
+        if (to.matched.length === 0) {
+          // 如果未匹配到路由
+          next({ path: '/401' })
+        } else {
+          next()
+        }
       } else {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          const menuPerms  = await store.dispatch('permission/getMenuPerms')
+          const menuPerms = await store.dispatch('permission/getMenuPerms')
 
-          store.dispatch('permission/getButtonPerms')
+          await store.dispatch('permission/getButtonPerms')
 
           // generate accessible routes map based on roles
           const accessRoutes = await store.dispatch('permission/generateRoutes', menuPerms)
