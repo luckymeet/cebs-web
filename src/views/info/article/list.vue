@@ -2,8 +2,15 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" class="filter-item" clearable />
-      <el-date-picker value="publishTime" type="datetimerange" :picker-options="pickerOptions" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" align="right" />
-
+      <el-date-picker value="publishTime" type="datetimerange" :picker-options="pickerOptions" range-separator="-" start-placeholder="发布开始日期" end-placeholder="发布结束日期" align="right" class="filter-item" /><br>
+      <el-select v-model="listQuery.status" placeholder="生效状态" class="filter-item">
+        <el-option label="生效" value="1" />
+        <el-option label="未生效" value="0" />
+      </el-select>
+      <el-select v-model="listQuery.isRecommend" placeholder="是否推荐" class="filter-item">
+        <el-option label="推荐" value="1" />
+        <el-option label="未推荐" value="0" />
+      </el-select>
       <el-button v-waves style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         查询
       </el-button>
@@ -136,6 +143,10 @@ export default {
         this.total = response.data.total
         this.listLoading = false
       })
+    },
+    handleFilter() {
+      this.listQuery.page = 1
+      this.getList()
     }
   }
 }
