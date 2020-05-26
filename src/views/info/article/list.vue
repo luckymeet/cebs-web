@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" class="filter-item" clearable />
-      <el-date-picker value="publishTime" type="datetimerange" :picker-options="pickerOptions" range-separator="-" start-placeholder="发布开始日期" end-placeholder="发布结束日期" align="right" class="filter-item" /><br>
+      <el-date-picker v-model="listQuery.publishTime" type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions" unlink-panels range-separator="-" start-placeholder="发布开始日期" end-placeholder="发布结束日期" align="right" class="filter-item" />
       <el-select v-model="listQuery.status" placeholder="生效状态" class="filter-item">
         <el-option label="生效" value="1" />
         <el-option label="未生效" value="0" />
@@ -11,17 +11,19 @@
         <el-option label="推荐" value="1" />
         <el-option label="未推荐" value="0" />
       </el-select>
-      <el-button v-waves style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+      <el-button style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         查询
       </el-button>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-refresh-left" @click="listQuery={}">
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh-left" @click="listQuery={}">
         重置
       </el-button>
     </div>
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" icon="el-icon-plus" @click="handleCreate">
-        新增
-      </el-button>
+      <router-link :to="'/info/article/create'">
+        <el-button class="filter-item" type="primary" icon="el-icon-plus">
+          新增
+        </el-button>
+      </router-link>
     </div>
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="ID" width="50">
@@ -56,7 +58,7 @@
           <el-switch v-model="row.isRecommend" :active-value="1" :inactive-value="0" @click="changeRecommend(row.id)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Actions" width="120">
+      <el-table-column align="center" label="操作" width="120">
         <template slot-scope="scope">
           <router-link :to="'/info/article/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
@@ -93,7 +95,8 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20
+        limit: 20,
+        publishTime: ['', '']
       },
       pickerOptions: {
         shortcuts: [{
@@ -129,7 +132,7 @@ export default {
             picker.$emit('pick', [start, end])
           }
         }]
-      }
+      },
     }
   },
   created() {
@@ -138,8 +141,12 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchArticleList(this.listQuery).then(response => {
-        this.list = response.data.items
+      const params = this.listQuery
+      params.publishStartTime = this.listQuery.publishTime[0]
+      params.publishEndTime = this.listQuery.publishTime[1]
+      params.publishTime = null
+      fetchArticleList(params).then(response => {
+        this.list = response.data.list
         this.total = response.data.total
         this.listLoading = false
       })

@@ -40,12 +40,10 @@ export const constantRoutes = [
     path: '/redirect',
     component: Layout,
     hidden: true,
-    children: [
-      {
-        path: '/redirect/:path(.*)',
-        component: () => import('@/views/redirect/index')
-      }
-    ]
+    children: [{
+      path: '/redirect/:path(.*)',
+      component: () => import('@/views/redirect/index')
+    }]
   },
   {
     path: '/login',
@@ -67,45 +65,34 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   }
-//  {
-//	path: '/documentation',
-//	component: Layout,
-//	children: [
-//	  {
-//	    path: 'index',
-//	    component: () => import('@/views/documentation/index'),
-//	    name: 'Documentation',
-//        meta: { title: 'Documentation', icon: 'documentation' }
-//      }
-//    ]
-//  },
-//  {
-//    path: '/guide',
-//    component: Layout,
-//    redirect: '/guide/index',
-//    children: [
-//      {
-//        path: 'index',
-//        component: () => import('@/views/guide/index'),
-//        name: 'Guide',
-//        meta: { title: 'Guide', icon: 'guide', noCache: true }
-//      }
-//    ]
-//  },
-//  {
-//    path: '/profile',
-//    component: Layout,
-//    redirect: '/profile/index',
-//    hidden: true,
-//    children: [
-//      {
-//        path: 'index',
-//        component: () => import('@/views/profile/index'),
-//        name: 'Profile',
-//        meta: { title: 'Profile', icon: 'user', noCache: true }
-//      }
-//    ]
-//  }
+
+  //  {
+  //    path: '/guide',
+  //    component: Layout,
+  //    redirect: '/guide/index',
+  //    children: [
+  //      {
+  //        path: 'index',
+  //        component: () => import('@/views/guide/index'),
+  //        name: 'Guide',
+  //        meta: { title: 'Guide', icon: 'guide', noCache: true }
+  //      }
+  //    ]
+  //  },
+  //  {
+  //    path: '/profile',
+  //    component: Layout,
+  //    redirect: '/profile/index',
+  //    hidden: true,
+  //    children: [
+  //      {
+  //        path: 'index',
+  //        component: () => import('@/views/profile/index'),
+  //        name: 'Profile',
+  //        meta: { title: 'Profile', icon: 'user', noCache: true }
+  //      }
+  //    ]
+  //  }
 ]
 
 /**
@@ -116,27 +103,23 @@ export const asyncRoutes = [
     path: '/',
     component: Layout,
     redirect: '/dashboard',
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: '首页',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
-    ]
+    children: [{
+      path: 'dashboard',
+      component: () => import('@/views/dashboard/index'),
+      name: '首页',
+      meta: { title: '首页', icon: 'dashboard', affix: true }
+    }]
   },
   {
     path: '/sys',
     component: Layout,
     redirect: '/sys/user',
-    children: [
-      {
-        path: 'user',
-        component: () => import('@/views/sys/user/list'),
-        name: '用户管理',
-        meta: { title: '用户管理', icon: 'user', perms: ['sys:user:list'] }
-      }
-    ]
+    children: [{
+      path: 'user',
+      component: () => import('@/views/sys/user/list'),
+      name: '用户管理',
+      meta: { title: '用户管理', icon: 'user', perms: ['sys:user:list'] }
+    }]
   },
   {
     path: '/info',
@@ -144,10 +127,20 @@ export const asyncRoutes = [
     redirect: '/info/article',
     children: [
       {
-        path: 'article',
+        path: 'article/list',
         component: () => import('@/views/info/article/list'),
         name: '文章管理',
         meta: { title: '文章管理', icon: 'user', perms: ['info:article:list'] }
+      },
+      {
+        path: 'article/create',
+        component: () => import('@/views/info/article/create'),
+        hidden: true
+      },
+      {
+        path: 'article/edit/:id(\\d+)',
+        component: () => import('@/views/info/article/edit'),
+        hidden: true
       }
     ]
   },
