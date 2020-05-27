@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" class="filter-item" clearable />
-      <el-date-picker v-model="listQuery.publishTime" type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions" unlink-panels range-separator="-" start-placeholder="发布开始日期" end-placeholder="发布结束日期" align="right" class="filter-item" />
+      <el-date-picker v-model="publishTime" type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" :picker-options="pickerOptions" unlink-panels range-separator="-" start-placeholder="发布开始日期" end-placeholder="发布结束日期" align="right" class="filter-item" />
       <el-select v-model="listQuery.status" placeholder="生效状态" class="filter-item">
         <el-option label="生效" value="1" />
         <el-option label="未生效" value="0" />
@@ -14,7 +14,7 @@
       <el-button style="margin-left: 10px;" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         查询
       </el-button>
-      <el-button class="filter-item" type="primary" icon="el-icon-refresh-left" @click="listQuery={}">
+      <el-button class="filter-item" type="primary" icon="el-icon-refresh-left" @click="listQuery={};publishTime=['', '']">
         重置
       </el-button>
     </div>
@@ -95,44 +95,44 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
-        publishTime: ['', '']
+        limit: 20
       },
+      publishTime: ['', ''],
       pickerOptions: {
         shortcuts: [{
-          text: '最近一周',
+          text: '最近7天',
           onClick(picker) {
-            const start = new Date()
-            const end = new Date()
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            const start = new Date(new Date().setHours(0, 0, 0, 0))
+            const end = new Date(new Date().setHours(23, 59, 59, 999))
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 6)
             picker.$emit('pick', [start, end])
           }
         }, {
-          text: '往后一周',
+          text: '往后7天',
           onClick(picker) {
-            const start = new Date()
-            const end = new Date()
-            end.setTime(end.getTime() + 3600 * 1000 * 24 * 7)
+            const start = new Date(new Date().setHours(0, 0, 0, 0))
+            const end = new Date(new Date().setHours(23, 59, 59, 999))
+            end.setTime(end.getTime() + 3600 * 1000 * 24 * 6)
             picker.$emit('pick', [start, end])
           }
         }, {
-          text: '最近一个月',
+          text: '最近30天',
           onClick(picker) {
-            const start = new Date()
-            const end = new Date()
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            const start = new Date(new Date().setHours(0, 0, 0, 0))
+            const end = new Date(new Date().setHours(23, 59, 59, 999))
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 29)
             picker.$emit('pick', [start, end])
           }
         }, {
-          text: '往后一个月',
+          text: '往后30天',
           onClick(picker) {
-            const start = new Date()
-            const end = new Date()
-            end.setTime(end.getTime() + 3600 * 1000 * 24 * 30)
+            const start = new Date(new Date().setHours(0, 0, 0, 0))
+            const end = new Date(new Date().setHours(23, 59, 59, 999))
+            end.setTime(end.getTime() + 3600 * 1000 * 24 * 29)
             picker.$emit('pick', [start, end])
           }
         }]
-      },
+      }
     }
   },
   created() {
@@ -141,11 +141,9 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      const params = this.listQuery
-      params.publishStartTime = this.listQuery.publishTime[0]
-      params.publishEndTime = this.listQuery.publishTime[1]
-      params.publishTime = null
-      fetchArticleList(params).then(response => {
+      this.listQuery.publishStartTime = this.publishTime[0]
+      this.listQuery.publishEndTime = this.publishTime[1]
+      fetchArticleList(this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total
         this.listLoading = false
