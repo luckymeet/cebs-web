@@ -35,8 +35,7 @@ import Layout from '@/layout'
  * constantRoutes a base page that does not have permission requirements all
  * roles can be accessed
  */
-export const constantRoutes = [
-  {
+export const constantRoutes = [{
     path: '/redirect',
     component: Layout,
     hidden: true,
@@ -98,8 +97,7 @@ export const constantRoutes = [
 /**
  * asyncRoutes the routes that need to be dynamically loaded based on user roles
  */
-export const asyncRoutes = [
-  {
+export const asyncRoutes = [{
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -125,8 +123,7 @@ export const asyncRoutes = [
     path: '/info',
     component: Layout,
     redirect: '/info/article',
-    children: [
-      {
+    children: [{
         path: 'article/list',
         component: () => import('@/views/info/article/list'),
         name: '文章管理',
@@ -144,7 +141,36 @@ export const asyncRoutes = [
       }
     ]
   },
-
+  /*  {
+      path: '/example',
+      component: Layout,
+      redirect: '/example/list',
+      name: 'Example',
+      meta: {
+        title: 'Example',
+        icon: 'example'
+      },
+      children: [{
+          path: 'create',
+          component: () => import('@/views/example/create'),
+          name: 'CreateArticle',
+          meta: { title: 'Create Article', icon: 'edit' }
+        },
+        {
+          path: 'edit/:id(\\d+)',
+          component: () => import('@/views/example/edit'),
+          name: 'EditArticle',
+          meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
+          hidden: true
+        },
+        {
+          path: 'list',
+          component: () => import('@/views/example/list'),
+          name: 'ArticleList',
+          meta: { title: 'Article List', icon: 'list' }
+        }
+      ]
+    },*/
   /*  {
     path: '/error',
     component: Layout,

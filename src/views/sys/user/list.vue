@@ -160,7 +160,10 @@ export default {
       },
       rules: {
         nickName: [{ required: true, message: '请输入昵称', trigger: 'change' }],
-        loginName: [{ required: true, message: '请输入登录名', trigger: 'change' }]
+        loginName: [{ required: true, message: '请输入登录名', trigger: 'change' }],
+        mobilePhone: [{ pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }],
+        eMail: [{ type: 'email', message: '请输入正确的电子邮箱', trigger: 'blur' }],
+        idCard: [{ pattern: /^[1-9]\d{5}(19|20)\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, message: '请输入正确的身份证号', trigger: 'blur' }]
       }
     }
   },

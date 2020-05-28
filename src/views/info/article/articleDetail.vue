@@ -1,80 +1,76 @@
 <template>
   <div class="createPost-container">
-    <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
-
-      <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
-        <CommentDropdown v-model="postForm.comment_disabled" />
-        <PlatformDropdown v-model="postForm.platforms" />
-        <SourceUrlDropdown v-model="postForm.source_uri" />
+    <el-form ref="article" :model="article" :rules="rules" class="form-container">
+      <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          Publish
+          保存
         </el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">
-          Draft
+        <el-button v-loading="loading" type="warning" @click="back()">
+          返回
         </el-button>
       </sticky>
-
       <div class="createPost-main-container">
         <el-row>
-          <Warning />
-
           <el-col :span="24">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
+              <MDinput v-model="article.title" :maxlength="100" name="name" required>
                 标题
               </MDinput>
             </el-form-item>
-
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="8">
-                  <el-form-item label-width="60px" label="作者:" class="postInfo-container-item">
-                    <el-select v-model="postForm.author" :remote-method="getRemoteUserList" filterable default-first-option remote placeholder="Search user">
-                      <el-option v-for="(item,index) in userListOptions" :key="item+index" :label="item" :value="item" />
-                    </el-select>
+                  <el-form-item prop="author" label-width="60px" label="作者:" class="postInfo-container-item">
+                    <el-input v-model="article.author" clearable />
                   </el-form-item>
                 </el-col>
-
                 <el-col :span="10">
-                  <el-form-item label-width="120px" label="发布时间:" class="postInfo-container-item">
-                    <el-date-picker v-model="displayTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="Select date and time" />
+                  <el-form-item prop="publishTime" label-width="120px" label="发布时间:" class="postInfo-container-item">
+                    <el-date-picker v-model="publishTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" />
                   </el-form-item>
                 </el-col>
-
                 <el-col :span="6">
-                  <el-form-item label-width="90px" label="Importance:" class="postInfo-container-item">
-                    <el-rate
-                      v-model="postForm.importance"
-                      :max="3"
-                      :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                      :low-threshold="1"
-                      :high-threshold="3"
-                      style="display:inline-block"
-                    />
+                  <el-form-item prop="status" label-width="90px" label="生效状态:" class="postInfo-container-item">
+                    <el-switch v-model="article.status" :inactive-value="0" :active-value="1" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col :span="8">
+                  <el-form-item prop="sourceAuthor" label-width="60px" label="源作者:" class="postInfo-container-item">
+                    <el-input v-model="article.sourceAuthor" clearable />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                  <el-form-item prop="sourceLink" label-width="120px" label="源链接:" class="postInfo-container-item">
+                    <el-input v-model="article.sourceLink" :rows="1" type="textarea" style="width: 150%" class="article-textarea" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                  <el-form-item prop="isShowDisclaimer" label-width="90px" label="免责申明:" class="postInfo-container-item">
+                    <el-switch v-model="article.isShowDisclaimer" :inactive-value="0" :active-value="1" />
                   </el-form-item>
                 </el-col>
               </el-row>
             </div>
           </el-col>
         </el-row>
-
-        <el-form-item style="margin-bottom: 40px;" label-width="70px" label="Summary:">
-          <el-input v-model="postForm.content_short" :rows="1" type="textarea" class="article-textarea" autosize placeholder="Please enter the content" />
-          <span v-show="contentShortLength" class="word-counter">{{ contentShortLength }}words</span>
+        <el-form-item prop="introduction" label-width="60px" label="简介:">
+          <el-input v-model="article.introduction" :rows="1" type="textarea" class="article-textarea" autosize />
         </el-form-item>
-
+        <el-form-item style="margin-bottom: 40px;">
+          <span v-show="contentShortLength" style="float: right;" class="word-counter">字数：{{ contentShortLength }}</span>
+        </el-form-item>
         <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="postForm.content" :height="400" />
+          <Tinymce ref="editor" v-model="article.content" :height="400" />
         </el-form-item>
-
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.image_uri" />
+        <el-form-item prop="imageUri" style="margin-bottom: 30px;">
+          <Upload v-model="article.imageUri" />
         </el-form-item>
       </div>
     </el-form>
   </div>
 </template>
-
 <script>
 import Tinymce from '@/components/Tinymce'
 import Upload from '@/components/Upload/SingleImage3'
@@ -83,26 +79,21 @@ import Sticky from '@/components/Sticky' // 粘性header组件
 import { validURL } from '@/utils/validate'
 import { fetchArticle } from '@/api/article'
 import { searchUser } from '@/api/remote-search'
-import Warning from './warning'
-import { CommentDropdown, PlatformDropdown, SourceUrlDropdown } from './Dropdown'
 
 const defaultForm = {
-  status: 'draft',
+  status: 1,
   title: '', // 文章题目
   content: '', // 文章内容
-  content_short: '', // 文章摘要
-  source_uri: '', // 文章外链
-  image_uri: '', // 文章图片
-  display_time: undefined, // 前台展示时间
+  introduction: '', // 文章摘要
+  sourceLink: '', // 文章外链
+  imageUri: '', // 文章图片
+  publishTime: undefined, // 前台展示时间
   id: undefined,
-  platforms: ['a-platform'],
-  comment_disabled: false,
-  importance: 0
 }
 
 export default {
   name: 'ArticleDetail',
-  components: { Tinymce, MDinput, Upload, Sticky, Warning, CommentDropdown, PlatformDropdown, SourceUrlDropdown },
+  components: { Tinymce, MDinput, Upload, Sticky },
   props: {
     isEdit: {
       type: Boolean,
@@ -112,10 +103,6 @@ export default {
   data() {
     const validateRequire = (rule, value, callback) => {
       if (value === '') {
-        this.$message({
-          message: rule.field + '为必传项',
-          type: 'error'
-        })
         callback(new Error(rule.field + '为必传项'))
       } else {
         callback()
@@ -126,43 +113,39 @@ export default {
         if (validURL(value)) {
           callback()
         } else {
-          this.$message({
-            message: '外链url填写不正确',
-            type: 'error'
-          })
-          callback(new Error('外链url填写不正确'))
+          callback(new Error('源链接url填写不正确'))
         }
       } else {
         callback()
       }
     }
     return {
-      postForm: Object.assign({}, defaultForm),
+      article: Object.assign({}, defaultForm),
       loading: false,
       userListOptions: [],
       rules: {
-        image_uri: [{ validator: validateRequire }],
-        title: [{ validator: validateRequire }],
-        content: [{ validator: validateRequire }],
-        source_uri: [{ validator: validateSourceUri, trigger: 'blur' }]
+        title: [{ validator: validateRequire, message: '请输入标题' }, { max: 50, message: '标题长度不能超过50个字符', trigger: 'change' }],
+        content: [{ validator: validateRequire, message: '请输入内容' }],
+        introduction: [{ validator: validateRequire, message: '请输入简介' }, { max: 200, message: '简介长度不能超过200个字符', trigger: 'change' }],
+        sourceLink: [{ validator: validateSourceUri, trigger: 'blur' }, { max: 500, message: '源链接不能超过500个字符', trigger: 'change' }]
       },
       tempRoute: {}
     }
   },
   computed: {
     contentShortLength() {
-      return this.postForm.content_short.length
+      return this.article.introduction.length
     },
-    displayTime: {
+    publishTime: {
       // set and get is useful when the data
       // returned by the back end api is different from the front end
       // back end return => "2013-06-25 06:59:25"
       // front end need timestamp => 1372114765000
       get() {
-        return (+new Date(this.postForm.display_time))
+        return (+new Date(this.article.publishTime))
       },
       set(val) {
-        this.postForm.display_time = new Date(val)
+        this.article.publishTime = new Date(val)
       }
     }
   },
@@ -180,11 +163,11 @@ export default {
   methods: {
     fetchData(id) {
       fetchArticle(id).then(response => {
-        this.postForm = response.data
+        this.article = response.data
 
         // just for test
-        this.postForm.title += `   Article Id:${this.postForm.id}`
-        this.postForm.content_short += `   Article Id:${this.postForm.id}`
+        // this.article.title += `   Article Id:${this.article.id}`
+        // this.article.introduction += `   Article Id:${this.article.id}`
 
         // set tagsview title
         this.setTagsViewTitle()
@@ -197,16 +180,16 @@ export default {
     },
     setTagsViewTitle() {
       const title = 'Edit Article'
-      const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
+      const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.article.id}` })
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     setPageTitle() {
       const title = 'Edit Article'
-      document.title = `${title} - ${this.postForm.id}`
+      document.title = `${title} - ${this.article.id}`
     },
     submitForm() {
-      console.log(this.postForm)
-      this.$refs.postForm.validate(valid => {
+      console.log(this.article)
+      this.$refs.article.validate(valid => {
         if (valid) {
           this.loading = true
           this.$notify({
@@ -215,7 +198,7 @@ export default {
             type: 'success',
             duration: 2000
           })
-          this.postForm.status = 'published'
+          this.article.status = 'published'
           this.loading = false
         } else {
           console.log('error submit!!')
@@ -223,32 +206,11 @@ export default {
         }
       })
     },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
-      })
-      this.postForm.status = 'draft'
-    },
-    getRemoteUserList(query) {
-      searchUser(query).then(response => {
-        if (!response.data.items) return
-        this.userListOptions = response.data.items.map(v => v.name)
-      })
-    }
+    back() {}
   }
 }
-</script>
 
+</script>
 <style lang="scss" scoped>
 @import "~@/styles/mixin.scss";
 
@@ -270,10 +232,11 @@ export default {
   }
 
   .word-counter {
-    width: 40px;
+    width: 80px;
     position: absolute;
-    right: 10px;
+    right: 0px;
     top: 0px;
+    color: #606266
   }
 }
 
@@ -286,4 +249,5 @@ export default {
     border-bottom: 1px solid #bfcbd9;
   }
 }
+
 </style>
