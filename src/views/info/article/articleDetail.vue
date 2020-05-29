@@ -1,19 +1,19 @@
 <template>
   <div class="createPost-container">
-    <el-form ref="article" :model="article" :rules="rules" class="form-container">
-      <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
-        <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          保存
-        </el-button>
-        <el-button v-loading="loading" type="warning" @click="back()">
-          返回
-        </el-button>
-      </sticky>
-      <div class="createPost-main-container">
+    <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
+      <el-button v-loading="loading" style="margin-left: 10px;" type="success" v-if="!isView" @click="submitForm">
+        保存
+      </el-button>
+      <el-button v-loading="loading" type="warning" @click="back()">
+        返回
+      </el-button>
+    </sticky>
+    <el-form ref="article" :model="article" :rules="rules" class="form-container" :disabled="isView">
+      <div class="createPost-main-container" :disabled="isView">
         <el-row>
           <el-col :span="24">
             <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="article.title" :maxlength="100" name="name" required>
+              <MDinput v-model="article.title" :maxlength="100" name="name" required :disabled="isView">
                 标题
               </MDinput>
             </el-form-item>
@@ -61,8 +61,8 @@
         <el-form-item style="margin-bottom: 40px;">
           <span v-show="contentShortLength" style="float: right;" class="word-counter">字数：{{ contentShortLength }}</span>
         </el-form-item>
-        <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="article.content" :height="400" />
+        <el-form-item prop="content" style="margin-bottom: 30px;" :disabled="isView">
+          <Tinymce ref="editor" v-model="article.content" :height="400" :disabled="isView" />
         </el-form-item>
         <el-form-item prop="imageUri" style="margin-bottom: 30px;">
           <Upload v-model="article.imageUri" />
@@ -77,8 +77,7 @@ import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import { validURL } from '@/utils/validate'
-import { fetchArticle } from '@/api/article'
-import { searchUser } from '@/api/remote-search'
+import { fetchArticle, createArticle, updateArticle } from '@/api/article'
 
 const defaultForm = {
   status: 1,
@@ -88,7 +87,7 @@ const defaultForm = {
   sourceLink: '', // 文章外链
   imageUri: '', // 文章图片
   publishTime: undefined, // 前台展示时间
-  id: undefined,
+  id: undefined
 }
 
 export default {
@@ -96,6 +95,10 @@ export default {
   components: { Tinymce, MDinput, Upload, Sticky },
   props: {
     isEdit: {
+      type: Boolean,
+      default: false
+    },
+    isView: {
       type: Boolean,
       default: false
     }
@@ -153,6 +156,9 @@ export default {
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
+    } else if (this.isView) {
+      const id = this.$route.params && this.$route.params.id
+      this.fetchData(id)
     }
 
     // Why need to make a copy of this.$route here?
@@ -179,31 +185,46 @@ export default {
       })
     },
     setTagsViewTitle() {
-      const title = 'Edit Article'
+      const title = '修改文章'
       const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.article.id}` })
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     setPageTitle() {
-      const title = 'Edit Article'
+      const title = '修改文章'
       document.title = `${title} - ${this.article.id}`
     },
     submitForm() {
-      console.log(this.article)
-      this.$refs.article.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
-          })
-          this.article.status = 'published'
-          this.loading = false
-        } else {
-          console.log('error submit!!')
-          return false
-        }
+      if (this.article.id) {
+        
+      }
+    },
+    createArticle() {
+      this.loading = true
+      createArticle(this.article).then(response => {
+        this.article.id = response.data
+        this.loading = false
+        this.$notify({
+          title: '成功',
+          message: '保存成功',
+          type: 'success',
+          duration: 2000
+        })
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    updateArticle() {
+      this.loading = true
+      updateArticle(this.article).then(response => {
+        this.loading = false
+        this.$notify({
+          title: '成功',
+          message: '修改成功',
+          type: 'success',
+          duration: 2000
+        })
+      }).catch(err => {
+        console.log(err)
       })
     },
     back() {}

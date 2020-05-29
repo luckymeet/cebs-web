@@ -10,23 +10,15 @@ export function fetchArticleList(query) {
 
 export function fetchArticle(id) {
   return request({
-    url: '/info/article/detail',
+    url: '/info/article',
     method: 'get',
     params: { id }
   })
 }
 
-export function fetchPv(pv) {
-  return request({
-    url: '/info/article/pv',
-    method: 'get',
-    params: { pv }
-  })
-}
-
 export function createArticle(data) {
   return request({
-    url: '/info/article/create',
+    url: '/info/article/add',
     method: 'post',
     data
   })
@@ -34,8 +26,8 @@ export function createArticle(data) {
 
 export function updateArticle(data) {
   return request({
-    url: '/info/article/update',
-    method: 'post',
+    url: '/info/article/edit',
+    method: 'put',
     data
   })
 }

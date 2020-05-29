@@ -138,6 +138,11 @@ export const asyncRoutes = [{
         path: 'article/edit/:id(\\d+)',
         component: () => import('@/views/info/article/edit'),
         hidden: true
+      },
+      {
+        path: 'article/view/:id(\\d+)',
+        component: () => import('@/views/info/article/view'),
+        hidden: true
       }
     ]
   },

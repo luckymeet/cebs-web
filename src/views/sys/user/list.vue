@@ -62,10 +62,10 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230px" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <el-button v-permission="['sys:user:edit']" type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button v-permission="['sys:user:edit']" size="mini" type="primary" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button v-permission="['sys:user:view']" size="mini" type="success" @click="handleView(row)">
+          <el-button v-permission="['sys:user:view']" size="mini" type="info" @click="handleView(row)">
             查看
           </el-button>
           <el-button v-permission="['sys:user:delete']" size="mini" type="danger" @click="handleDelete(row,$index)">

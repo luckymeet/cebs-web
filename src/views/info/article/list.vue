@@ -31,7 +31,7 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column min-width="300px" label="标题">
+      <el-table-column min-width="150px" label="标题">
         <template slot-scope="{row}">
           <router-link :to="'/info/article/edit/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
@@ -58,13 +58,24 @@
           <el-switch v-model="row.isRecommend" :active-value="1" :inactive-value="0" @click="changeRecommend(row.id)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="120">
+      <el-table-column align="center" label="操作" min-width="60px">
         <template slot-scope="scope">
-          <router-link :to="'/info/article/edit/'+scope.row.id">
-            <el-button type="primary" size="small" icon="el-icon-edit">
+          <el-button type="primary" size="mini">
+            <router-link :to="'/info/article/edit/'+scope.row.id">
               编辑
-            </el-button>
-          </router-link>
+            </router-link>
+          </el-button>
+          <el-button type="info" size="mini">
+            <router-link :to="'/info/article/view/'+scope.row.id">
+              查看
+            </router-link>
+          </el-button>
+          <el-button type="success" size="mini" @click="handlePublish(row,$index)">
+            发布
+          </el-button>
+          <el-button type="danger" size="mini" @click="handleDelete(row,$index)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
