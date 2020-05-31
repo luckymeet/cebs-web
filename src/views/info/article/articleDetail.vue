@@ -1,7 +1,7 @@
 <template>
   <div class="createPost-container">
     <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
-      <el-button v-loading="loading" style="margin-left: 10px;" type="success" v-if="!isView" @click="submitForm">
+      <el-button v-loading="loading" style="margin-left: 10px;" v-if="!isView" type="success" @click="submitForm">
         保存
       </el-button>
       <el-button v-loading="loading" type="warning" @click="back()">
@@ -195,7 +195,9 @@ export default {
     },
     submitForm() {
       if (this.article.id) {
-        
+        this.updateArticle()
+      } else {
+        this.createArticle()
       }
     },
     createArticle() {
@@ -210,6 +212,7 @@ export default {
           duration: 2000
         })
       }).catch(err => {
+        this.loading = false
         console.log(err)
       })
     },
@@ -224,6 +227,7 @@ export default {
           duration: 2000
         })
       }).catch(err => {
+        this.loading = false
         console.log(err)
       })
     },

@@ -18,7 +18,7 @@ export function fetchArticle(id) {
 
 export function createArticle(data) {
   return request({
-    url: '/info/article/add',
+    url: '/info/article',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function createArticle(data) {
 
 export function updateArticle(data) {
   return request({
-    url: '/info/article/edit',
+    url: '/info/article',
     method: 'put',
     data
   })
