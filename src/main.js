@@ -22,6 +22,9 @@ import * as filters from './filters' // global filters
 import permission from '@/directive/permission/index.js' // 权限判断指令
 import checkPermission from '@/utils/permission' // 权限判断函数
 
+import request from '@/utils/request'
+Vue.prototype.$ajax = request;
+
 Vue.use(permission)
 Vue.prototype.checkPermission = checkPermission
 /**

@@ -26,7 +26,7 @@
                 </el-col>
                 <el-col :span="10">
                   <el-form-item prop="publishTime" label-width="120px" label="发布时间:" class="postInfo-container-item">
-                    <el-date-picker v-model="publishTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" />
+                    <el-date-picker v-model="article.publishTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="6">
@@ -138,19 +138,19 @@ export default {
   computed: {
     contentShortLength() {
       return this.article.introduction.length
-    },
-    publishTime: {
-      // set and get is useful when the data
-      // returned by the back end api is different from the front end
-      // back end return => "2013-06-25 06:59:25"
-      // front end need timestamp => 1372114765000
-      get() {
-        return (+new Date(this.article.publishTime))
-      },
-      set(val) {
-        this.article.publishTime = new Date(val)
-      }
     }
+    // publishTime: {
+    // set and get is useful when the data
+    // returned by the back end api is different from the front end
+    // back end return => "2013-06-25 06:59:25"
+    // front end need timestamp => 1372114765000
+    // get() {
+    //   return (+new Date(this.article.publishTime))
+    // },
+    // set(val) {
+    //   this.article.publishTime = new Date(val)
+    // }
+    // }
   },
   created() {
     if (this.isEdit) {
@@ -215,6 +215,23 @@ export default {
         this.loading = false
         console.log(err)
       })
+      // this.$ajax({
+      //   url: "/info/article",
+      //   method: "post",
+      //   headers: {
+      //     'Content-type': 'application/json;charset=UTF-8'
+      //   },
+      //   data: this.$ajax.adornData(this.article, false, 'json')
+      // }).then((res) => {
+      //   if (res && res.code === 200) {
+      //     this.$notify({
+      //       title: '成功',
+      //       message: '修改成功',
+      //       type: 'success',
+      //       duration: 2000
+      //     })
+      //   }
+      // })
     },
     updateArticle() {
       this.loading = true
@@ -230,6 +247,23 @@ export default {
         this.loading = false
         console.log(err)
       })
+      // this.$ajax({
+      //   url: "/info/article",
+      //   method: "put",
+      //   headers: {
+      //     'Content-type': 'application/json;charset=UTF-8'
+      //   },
+      //   data: this.$ajax.adornData(this.article, false, 'json')
+      // }).then((res) => {
+      //   if (res && res.code === 200) {
+      //     this.$notify({
+      //       title: '成功',
+      //       message: '修改成功',
+      //       type: 'success',
+      //       duration: 2000
+      //     })
+      //   }
+      // })
     },
     back() {}
   }
