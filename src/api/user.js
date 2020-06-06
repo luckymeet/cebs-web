@@ -47,10 +47,43 @@ export function editUser(params) {
   })
 }
 
+export function viewUser(id) {
+  return request({
+    url: '/sys/user/view',
+    method: 'get',
+    params: { id }
+  })
+}
+
 export function deleteUser(id) {
   return request({
-    url: '/sys/user/' + {id},
+    url: '/sys/user/',
     method: 'delete',
+    params: { id }
+  })
+}
+
+export function resetPassword(id) {
+  return request({
+    url: '/sys/user/password/reset',
+    method: 'put',
+    params: { id }
+  })
+}
+
+export function updatePassword(params) {
+  return request({
+    url: '/sys/user/password/update',
+    method: 'put',
+    params: params
+  })
+}
+
+export function changeStatus(params) {
+  return request({
+    url: '/sys/user/status/change',
+    method: 'put',
+    params: params
   })
 }
 

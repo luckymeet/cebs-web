@@ -1,7 +1,7 @@
 <template>
   <div class="createPost-container">
     <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
-      <el-button v-loading="loading" style="margin-left: 10px;" v-if="!isView" type="success" @click="submitForm">
+      <el-button v-loading="loading" style="margin-left: 10px;" v-if="!isView" :disabled="!article.title" type="success" @click="submitForm">
         保存
       </el-button>
       <el-button v-loading="loading" type="warning" @click="back()">
@@ -31,7 +31,7 @@
                 </el-col>
                 <el-col :span="6">
                   <el-form-item prop="status" label-width="90px" label="生效状态:" class="postInfo-container-item">
-                    <el-switch v-model="article.status" :inactive-value="0" :active-value="1" />
+                    <el-switch v-model="article.status" :inactive-value="0" :active-value="1" @input="handleStatus" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -77,7 +77,7 @@ import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import { validURL } from '@/utils/validate'
-import { fetchArticle, createArticle, updateArticle } from '@/api/article'
+import { fetchArticle, createArticle, updateArticle, viewArticle } from '@/api/article'
 
 const defaultForm = {
   status: 1,
@@ -125,14 +125,38 @@ export default {
     return {
       article: Object.assign({}, defaultForm),
       loading: false,
+      srcArticle: {},
       userListOptions: [],
       rules: {
         title: [{ validator: validateRequire, message: '请输入标题' }, { max: 50, message: '标题长度不能超过50个字符', trigger: 'change' }],
-        content: [{ validator: validateRequire, message: '请输入内容' }],
-        introduction: [{ validator: validateRequire, message: '请输入简介' }, { max: 200, message: '简介长度不能超过200个字符', trigger: 'change' }],
+        content: [],
+        introduction: [{ max: 200, message: '简介长度不能超过200个字符', trigger: 'change' }],
         sourceLink: [{ validator: validateSourceUri, trigger: 'blur' }, { max: 500, message: '源链接不能超过500个字符', trigger: 'change' }]
       },
       tempRoute: {}
+    }
+  },
+  watch: {
+    'article.title': {
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
+    },
+    'article.introduction': { 
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
+    },
+    'article.content': {
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
     }
   },
   computed: {
@@ -158,7 +182,7 @@ export default {
       this.fetchData(id)
     } else if (this.isView) {
       const id = this.$route.params && this.$route.params.id
-      this.fetchData(id)
+      this.viewData(id)
     }
 
     // Why need to make a copy of this.$route here?
@@ -168,16 +192,23 @@ export default {
   },
   methods: {
     fetchData(id) {
-      fetchArticle(id).then(response => {
+      viewArticle(id).then(response => {
         this.article = response.data
-
-        // just for test
-        // this.article.title += `   Article Id:${this.article.id}`
-        // this.article.introduction += `   Article Id:${this.article.id}`
-
+        this.srcArticle = Object.assign({}, this.article)
         // set tagsview title
         this.setTagsViewTitle()
-
+        // set page title
+        this.setPageTitle()
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    viewData(id) {
+      fetchArticle(id).then(response => {
+        this.article = response.data
+        this.srcArticle = Object.assign({}, this.article)
+        // set tagsview title
+        this.setTagsViewTitle()
         // set page title
         this.setPageTitle()
       }).catch(err => {
@@ -205,67 +236,72 @@ export default {
       createArticle(this.article).then(response => {
         this.article.id = response.data
         this.loading = false
-        this.$notify({
-          title: '成功',
+        this.srcArticle = Object.assign({}, this.article)
+        this.$message({
           message: '保存成功',
-          type: 'success',
-          duration: 2000
+          type: 'success'
         })
+        // set tagsview title
+        this.setTagsViewTitle()
+        // set page title
+        this.setPageTitle()
       }).catch(err => {
         this.loading = false
         console.log(err)
       })
-      // this.$ajax({
-      //   url: "/info/article",
-      //   method: "post",
-      //   headers: {
-      //     'Content-type': 'application/json;charset=UTF-8'
-      //   },
-      //   data: this.$ajax.adornData(this.article, false, 'json')
-      // }).then((res) => {
-      //   if (res && res.code === 200) {
-      //     this.$notify({
-      //       title: '成功',
-      //       message: '修改成功',
-      //       type: 'success',
-      //       duration: 2000
-      //     })
-      //   }
-      // })
     },
     updateArticle() {
       this.loading = true
       updateArticle(this.article).then(response => {
         this.loading = false
-        this.$notify({
-          title: '成功',
+        this.srcArticle = Object.assign({}, this.article)
+        this.$message({
           message: '修改成功',
-          type: 'success',
-          duration: 2000
+          type: 'success'
         })
       }).catch(err => {
         this.loading = false
         console.log(err)
       })
-      // this.$ajax({
-      //   url: "/info/article",
-      //   method: "put",
-      //   headers: {
-      //     'Content-type': 'application/json;charset=UTF-8'
-      //   },
-      //   data: this.$ajax.adornData(this.article, false, 'json')
-      // }).then((res) => {
-      //   if (res && res.code === 200) {
-      //     this.$notify({
-      //       title: '成功',
-      //       message: '修改成功',
-      //       type: 'success',
-      //       duration: 2000
-      //     })
-      //   }
-      // })
     },
-    back() {}
+    handleStatus(event) {
+      if (event === 1 && !this.validStatus()) {
+        this.$message({
+          message: '请先将标题、简介、内容填写完整',
+          type: 'warning'
+        })
+        this.article.status = 0
+      } else {
+        this.article.status = event;
+      }
+    },
+    validStatus() {
+      if (!this.article.title || !this.article.introduction || !this.article.content) {
+        return false
+      }
+      return true
+    },
+    back() {
+      if (!this.article.id && (this.article.title || this.article.introduction || this.article.content)) {
+        this.$confirm('该文章还未保存, 是否继续返回?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$router.push('/info/article/list')
+        }).catch(() => {})
+      } else if (JSON.stringify(this.srcArticle) !== JSON.stringify(this.article)) {
+        this.$confirm('改变还未保存, 是否继续返回?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$router.push('/info/article/list')
+        }).catch(() => {})
+      } else {
+        this.$router.push('/info/article/list')
+      }
+    }
   }
 }
 

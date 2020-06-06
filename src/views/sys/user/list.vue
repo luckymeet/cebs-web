@@ -18,13 +18,7 @@
         密码重置
       </el-button>
     </div>
-    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%;">
-      <el-table-column type="selection" align="center" width="50" />
-      <!--       <el-table-column label="用户编号" align="center" width="150px">
-        <template slot-scope="{row}">
-          <span>{{ row.userNum }}</span>
-        </template>
-      </el-table-column> -->
+    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 98%;">
       <el-table-column label="真实姓名" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.realName }}</span>
@@ -60,15 +54,15 @@
           <span>{{ row.createUser }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="230px" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200px" fixed="right">
         <template slot-scope="{row,$index}">
-          <el-button v-permission="['sys:user:edit']" size="mini" type="primary" @click="handleUpdate(row)">
+          <el-button v-permission="['sys:user:edit']" size="mini" type="text" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button v-permission="['sys:user:view']" size="mini" type="info" @click="handleView(row)">
+          <el-button v-permission="['sys:user:view']" size="mini" type="text" @click="handleView(row)">
             查看
           </el-button>
-          <el-button v-permission="['sys:user:delete']" size="mini" type="danger" @click="handleDelete(row,$index)">
+          <el-button v-permission="['sys:user:delete']" size="mini" type="text" @click="handleDelete(row)">
             删除
           </el-button>
         </template>
@@ -122,7 +116,7 @@
   </div>
 </template>
 <script>
-import { fetchUserList, getUser, addUser, editUser, deleteUser } from '@/api/user'
+import { fetchUserList, getUser, addUser, editUser, deleteUser, viewUser } from '@/api/user'
 import { queryCurUserPermTree } from '@/api/perm'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -214,8 +208,9 @@ export default {
             this.dialogFormVisible = false
             this.$message({
               type: 'success',
-              message: '新增成功!'
+              message: '新增成功'
             })
+            this.handleFilter()
           })
         }
       })
@@ -239,8 +234,9 @@ export default {
             this.dialogFormVisible = false
             this.$message({
               type: 'success',
-              message: '修改成功!'
+              message: '修改成功'
             })
+            this.handleFilter()
           })
         }
       })
@@ -249,23 +245,24 @@ export default {
       this.dialogStatus = 'view'
       this.dialogFormVisible = true
       this.disabled = true
-      getUser(row.id).then(response => {
+      viewUser(row.id).then(response => {
         this.user = response.data
         this.loadPermTree()
         this.permArray = this.user.permIds.split(',')
       })
     },
-    handleDelete(row, index) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+    handleDelete(row) {
+      this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteUser(this.user).then(response => {
+        deleteUser(row.id).then(response => {
           this.$message({
             type: 'success',
-            message: '删除成功!'
+            message: '删除成功'
           })
+          this.handleFilter()
         })
       }).catch(() => {
         this.$message({

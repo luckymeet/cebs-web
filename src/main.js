@@ -24,6 +24,7 @@ import checkPermission from '@/utils/permission' // 权限判断函数
 
 import request from '@/utils/request'
 Vue.prototype.$ajax = request;
+Vue.prototype.router = router;
 
 Vue.use(permission)
 Vue.prototype.checkPermission = checkPermission
