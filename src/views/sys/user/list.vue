@@ -18,7 +18,7 @@
         密码重置
       </el-button>
     </div>
-    <el-table :key="tableKey" v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 98%;">
+    <el-table :key="tableKey" :data="list" border fit highlight-current-row style="width: 98%;">
       <el-table-column label="真实姓名" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.realName }}</span>
@@ -36,7 +36,7 @@
       </el-table-column>
       <el-table-column label="生效状态" class-name="status-col" width="100px">
         <template slot-scope="{row}">
-          <el-switch v-model="row.status" :disabled="!checkPermission(['sys:user:status:change'])" :active-value="1" :inactive-value="0" @click="changeStatus(row.id)" />
+          <el-switch v-model="row.status" :disabled="!checkPermission(['sys:user:status:change'])" :active-value="1" :inactive-value="0" @click="changeStatus(row)" />
         </template>
       </el-table-column>
       <el-table-column label="最后登录时间" width="200px" align="center">
@@ -55,7 +55,7 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="200px" fixed="right">
-        <template slot-scope="{row,$index}">
+        <template slot-scope="{row}">
           <el-button v-permission="['sys:user:edit']" size="mini" type="text" @click="handleUpdate(row)">
             编辑
           </el-button>
@@ -116,7 +116,7 @@
   </div>
 </template>
 <script>
-import { fetchUserList, getUser, addUser, editUser, deleteUser, viewUser } from '@/api/user'
+import { fetchUserList, getUser, addUser, editUser, deleteUser, viewUser, changeStatus } from '@/api/user'
 import { queryCurUserPermTree } from '@/api/perm'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -135,7 +135,6 @@ export default {
       tableKey: 0,
       list: null,
       total: 0,
-      listLoading: true,
       listQuery: {
         pageNum: 1,
         pageSize: 10
@@ -166,11 +165,9 @@ export default {
   },
   methods: {
     getList() {
-      this.listLoading = true
       fetchUserList(this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total
-        this.listLoading = false
       })
     },
     handleFilter() {
@@ -275,7 +272,19 @@ export default {
       queryCurUserPermTree().then(response => {
         this.permTree = response.data
       })
-    }
+    },
+    changeStatus(row) {
+      changeStatus({ 'id': row.id, 'status': row.status }).then(
+        response => {
+          this.$message({
+            type: 'success',
+            message: '修改成功'
+          })
+        },
+        error => {
+          row.status = (row.status + 1) % 2
+        })
+    },
   }
 }
 

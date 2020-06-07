@@ -6,13 +6,13 @@ import 'nprogress/nprogress.css' // progress bar style
 import { getUser } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
-NProgress.configure({ showSpinner: false }) // NProgress Configuration
+// NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
   // start progress bar
-  NProgress.start()
+  // NProgress.start()
 
   // set page title
   document.title = getPageTitle(to.meta.title)
@@ -24,7 +24,7 @@ router.beforeEach(async(to, from, next) => {
     if (to.path === '/login') {
       // if is logged in, redirect to the home page
       next({ path: '/' })
-      NProgress.done()
+      // NProgress.done()
     } else {
       // determine whether the user has obtained his permission roles through getInfo
       const hasRoutes = store.getters.permission_routes && store.getters.permission_routes.length > 0
@@ -57,7 +57,7 @@ router.beforeEach(async(to, from, next) => {
           await store.dispatch('user/resetUser')
           Message.error(error || 'Has Error')
           next(`/login`)
-          NProgress.done()
+          // NProgress.done()
         }
       }
     }
@@ -70,12 +70,12 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // other pages that do not have permission to access are redirected to the login page.
       next(`/login?redirect=${to.path}`)
-      NProgress.done()
+      // NProgress.done()
     }
   }
 })
 
 router.afterEach(() => {
   // finish progress bar
-  NProgress.done()
+  // NProgress.done()
 })

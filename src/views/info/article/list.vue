@@ -25,7 +25,7 @@
         </el-button>
       </router-link>
     </div>
-    <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 98%">
+    <el-table :data="list" border fit highlight-current-row style="width: 98%">
       <el-table-column align="center" label="ID" width="50">
         <template slot-scope="{row}">
           <span>{{ row.id }}</span>
@@ -166,13 +166,11 @@ export default {
   },
   methods: {
     getList() {
-      this.listLoading = true
       this.listQuery.publishStartTime = this.publishTimeRange[0]
       this.listQuery.publishEndTime = this.publishTimeRange[1]
       fetchArticleList(this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total
-        this.listLoading = false
       })
     },
     handleFilter() {
@@ -268,7 +266,7 @@ export default {
           message: '已取消删除'
         })
       })
-    },
+    }
   }
 }
 

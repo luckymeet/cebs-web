@@ -1,10 +1,10 @@
 <template>
   <div class="createPost-container">
     <sticky :z-index="10" :class-name="article.status == 1 && article.id != null ? 'sub-navbar published' : 'sub-navbar draft'">
-      <el-button v-loading="loading" style="margin-left: 10px;" v-if="!isView" :disabled="!article.title" type="success" @click="submitForm">
+      <el-button v-if="!isView" style="margin-left: 10px;" :disabled="!article.title" type="success" @click="submitForm">
         保存
       </el-button>
-      <el-button v-loading="loading" type="warning" @click="back()">
+      <el-button type="warning" @click="back()">
         返回
       </el-button>
     </sticky>
@@ -80,7 +80,7 @@ import { validURL } from '@/utils/validate'
 import { fetchArticle, createArticle, updateArticle, viewArticle } from '@/api/article'
 
 const defaultForm = {
-  status: 1,
+  status: 0,
   title: '', // 文章题目
   content: '', // 文章内容
   introduction: '', // 文章摘要
@@ -124,7 +124,6 @@ export default {
     }
     return {
       article: Object.assign({}, defaultForm),
-      loading: false,
       srcArticle: {},
       userListOptions: [],
       rules: {
@@ -134,29 +133,6 @@ export default {
         sourceLink: [{ validator: validateSourceUri, trigger: 'blur' }, { max: 500, message: '源链接不能超过500个字符', trigger: 'change' }]
       },
       tempRoute: {}
-    }
-  },
-  watch: {
-    'article.title': {
-      handler(newVal, oldVal) {
-        if (oldVal && !newVal) {
-          this.article.status = 0
-        }
-      }
-    },
-    'article.introduction': { 
-      handler(newVal, oldVal) {
-        if (oldVal && !newVal) {
-          this.article.status = 0
-        }
-      }
-    },
-    'article.content': {
-      handler(newVal, oldVal) {
-        if (oldVal && !newVal) {
-          this.article.status = 0
-        }
-      }
     }
   },
   computed: {
@@ -175,6 +151,29 @@ export default {
     //   this.article.publishTime = new Date(val)
     // }
     // }
+  },
+  watch: {
+    'article.title': {
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
+    },
+    'article.introduction': {
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
+    },
+    'article.content': {
+      handler(newVal, oldVal) {
+        if (oldVal && !newVal) {
+          this.article.status = 0
+        }
+      }
+    }
   },
   created() {
     if (this.isEdit) {
@@ -235,7 +234,6 @@ export default {
       this.loading = true
       createArticle(this.article).then(response => {
         this.article.id = response.data
-        this.loading = false
         this.srcArticle = Object.assign({}, this.article)
         this.$message({
           message: '保存成功',
@@ -246,21 +244,18 @@ export default {
         // set page title
         this.setPageTitle()
       }).catch(err => {
-        this.loading = false
         console.log(err)
       })
     },
     updateArticle() {
       this.loading = true
       updateArticle(this.article).then(response => {
-        this.loading = false
         this.srcArticle = Object.assign({}, this.article)
         this.$message({
           message: '修改成功',
           type: 'success'
         })
       }).catch(err => {
-        this.loading = false
         console.log(err)
       })
     },
@@ -272,7 +267,7 @@ export default {
         })
         this.article.status = 0
       } else {
-        this.article.status = event;
+        this.article.status = event
       }
     },
     validStatus() {
